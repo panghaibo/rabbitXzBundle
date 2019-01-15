@@ -4,71 +4,71 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="old_sound_rabbit_mq.connection.class">PhpAmqpLib\Connection\AMQPConnection</parameter>
-        <parameter key="old_sound_rabbit_mq.socket_connection.class">PhpAmqpLib\Connection\AMQPSocketConnection</parameter>
-        <parameter key="old_sound_rabbit_mq.lazy.connection.class">PhpAmqpLib\Connection\AMQPLazyConnection</parameter>
-        <parameter key="old_sound_rabbit_mq.lazy.socket_connection.class">PhpAmqpLib\Connection\AMQPLazySocketConnection</parameter>
-        <parameter key="old_sound_rabbit_mq.connection_factory.class">OldSound\RabbitMqBundle\RabbitMq\AMQPConnectionFactory</parameter>
-        <parameter key="old_sound_rabbit_mq.binding.class">OldSound\RabbitMqBundle\RabbitMq\Binding</parameter>
-        <parameter key="old_sound_rabbit_mq.producer.class">OldSound\RabbitMqBundle\RabbitMq\Producer</parameter>
-        <parameter key="old_sound_rabbit_mq.consumer.class">OldSound\RabbitMqBundle\RabbitMq\Consumer</parameter>
-        <parameter key="old_sound_rabbit_mq.multi_consumer.class">OldSound\RabbitMqBundle\RabbitMq\MultipleConsumer</parameter>
-        <parameter key="old_sound_rabbit_mq.dynamic_consumer.class">OldSound\RabbitMqBundle\RabbitMq\DynamicConsumer</parameter>
-        <parameter key="old_sound_rabbit_mq.batch_consumer.class">OldSound\RabbitMqBundle\RabbitMq\BatchConsumer</parameter>
-        <parameter key="old_sound_rabbit_mq.anon_consumer.class">OldSound\RabbitMqBundle\RabbitMq\AnonConsumer</parameter>
-        <parameter key="old_sound_rabbit_mq.rpc_client.class">OldSound\RabbitMqBundle\RabbitMq\RpcClient</parameter>
-        <parameter key="old_sound_rabbit_mq.rpc_server.class">OldSound\RabbitMqBundle\RabbitMq\RpcServer</parameter>
-        <parameter key="old_sound_rabbit_mq.logged.channel.class">OldSound\RabbitMqBundle\RabbitMq\AMQPLoggedChannel</parameter>
-        <parameter key="old_sound_rabbit_mq.data_collector.class">OldSound\RabbitMqBundle\DataCollector\MessageDataCollector</parameter>
-        <parameter key="old_sound_rabbit_mq.parts_holder.class">OldSound\RabbitMqBundle\RabbitMq\AmqpPartsHolder</parameter>
-        <parameter key="old_sound_rabbit_mq.fallback.class">OldSound\RabbitMqBundle\RabbitMq\Fallback</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.connection.class">PhpAmqpLib\Connection\AMQPConnection</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.socket_connection.class">PhpAmqpLib\Connection\AMQPSocketConnection</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.lazy.connection.class">PhpAmqpLib\Connection\AMQPLazyConnection</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.lazy.socket_connection.class">PhpAmqpLib\Connection\AMQPLazySocketConnection</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.connection_factory.class">XiaoZhu\RabbitXzBundle\RabbitMq\AMQPConnectionFactory</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.binding.class">XiaoZhu\RabbitXzBundle\RabbitMq\Binding</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.producer.class">XiaoZhu\RabbitXzBundle\RabbitMq\Producer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.consumer.class">XiaoZhu\RabbitXzBundle\RabbitMq\Consumer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.multi_consumer.class">XiaoZhu\RabbitXzBundle\RabbitMq\MultipleConsumer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.dynamic_consumer.class">XiaoZhu\RabbitXzBundle\RabbitMq\DynamicConsumer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.batch_consumer.class">XiaoZhu\RabbitXzBundle\RabbitMq\BatchConsumer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.anon_consumer.class">XiaoZhu\RabbitXzBundle\RabbitMq\AnonConsumer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.rpc_client.class">XiaoZhu\RabbitXzBundle\RabbitMq\RpcClient</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.rpc_server.class">XiaoZhu\RabbitXzBundle\RabbitMq\RpcServer</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.logged.channel.class">XiaoZhu\RabbitXzBundle\RabbitMq\AMQPLoggedChannel</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.data_collector.class">XiaoZhu\RabbitXzBundle\DataCollector\MessageDataCollector</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.parts_holder.class">XiaoZhu\RabbitXzBundle\RabbitMq\AmqpPartsHolder</parameter>
+        <parameter key="xiao_zhu_rabbit_xz.fallback.class">XiaoZhu\RabbitXzBundle\RabbitMq\Fallback</parameter>
     </parameters>
 
     <services>
-        <service id="old_sound_rabbit_mq.data_collector" class="%old_sound_rabbit_mq.data_collector.class%">
+        <service id="xiao_zhu_rabbit_xz.data_collector" class="%xiao_zhu_rabbit_xz.data_collector.class%">
             <argument type="collection" />
             <tag name="data_collector" template="@OldSoundRabbitMq/Collector/collector.html.twig" id="rabbit_mq" />
         </service>
         
-        <service id="old_sound_rabbit_mq.parts_holder" class="%old_sound_rabbit_mq.parts_holder.class%" public="true" />
+        <service id="xiao_zhu_rabbit_xz.parts_holder" class="%xiao_zhu_rabbit_xz.parts_holder.class%" public="true" />
 
-        <service id="old_sound_rabbit_mq.anon_consumer_command" class="OldSound\RabbitMqBundle\Command\AnonConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.anon_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\AnonConsumerCommand">
             <tag name="console.command" command="rabbitmq:anon-consumer" />
         </service>
 
-        <service id="old_sound_rabbit_mq.batch_consumer_command" class="OldSound\RabbitMqBundle\Command\BatchConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.batch_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\BatchConsumerCommand">
             <tag name="console.command" command="rabbitmq:batch:consumer" />
         </service>
 
-        <service id="old_sound_rabbit_mq.consumer_command" class="OldSound\RabbitMqBundle\Command\ConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.consumer_command" class="XiaoZhu\RabbitXzBundle\Command\ConsumerCommand">
             <tag name="console.command" command="rabbitmq:consumer" />
         </service>
 
-        <service id="old_sound_rabbit_mq.delete_command" class="OldSound\RabbitMqBundle\Command\DeleteCommand">
+        <service id="xiao_zhu_rabbit_xz.delete_command" class="XiaoZhu\RabbitXzBundle\Command\DeleteCommand">
             <tag name="console.command" command="rabbitmq:delete" />
         </service>
 
-        <service id="old_sound_rabbit_mq.dynamic_consumer_command" class="OldSound\RabbitMqBundle\Command\DynamicConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.dynamic_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\DynamicConsumerCommand">
             <tag name="console.command" command="rabbitmq:dynamic-consumer" />
         </service>
 
-        <service id="old_sound_rabbit_mq.multiple_consumer_command" class="OldSound\RabbitMqBundle\Command\MultipleConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.multiple_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\MultipleConsumerCommand">
             <tag name="console.command" command="rabbitmq:multiple-consumer" />
         </service>
 
-        <service id="old_sound_rabbit_mq.purge_consumer_command" class="OldSound\RabbitMqBundle\Command\PurgeConsumerCommand">
+        <service id="xiao_zhu_rabbit_xz.purge_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\PurgeConsumerCommand">
             <tag name="console.command" command="rabbitmq:purge" />
         </service>
 
-        <service id="old_sound_rabbit_mq.command.rpc_server_command" class="OldSound\RabbitMqBundle\Command\RpcServerCommand">
+        <service id="xiao_zhu_rabbit_xz.command.rpc_server_command" class="XiaoZhu\RabbitXzBundle\Command\RpcServerCommand">
             <tag name="console.command" command="rabbitmq:rpc-server" />
         </service>
 
-        <service id="old_sound_rabbit_mq.command.setup_fabric_command" class="OldSound\RabbitMqBundle\Command\SetupFabricCommand">
+        <service id="xiao_zhu_rabbit_xz.command.setup_fabric_command" class="XiaoZhu\RabbitXzBundle\Command\SetupFabricCommand">
             <tag name="console.command" command="rabbitmq:setup-fabric" />
         </service>
 
-        <service id="old_sound_rabbit_mq.command.std_in_producer_command" class="OldSound\RabbitMqBundle\Command\StdInProducerCommand">
+        <service id="xiao_zhu_rabbit_xz.command.std_in_producer_command" class="XiaoZhu\RabbitXzBundle\Command\StdInProducerCommand">
             <tag name="console.command" command="rabbitmq:stdin-producer" />
         </service>
     </services>

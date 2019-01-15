@@ -101,6 +101,6 @@ final class BatchConsumerCommand extends BaseRabbitMqCommand
      */
     protected function getConsumerService()
     {
-        return 'old_sound_rabbit_mq.%s_batch';
+        return 'xiao_zhu_rabbit_xz.%s_batch';
     }
 }

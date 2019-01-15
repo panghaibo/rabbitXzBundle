@@ -24,7 +24,7 @@ class InjectEventDispatcherPass implements CompilerPassInterface
         if (!$container->has(self::EVENT_DISPATCHER_SERVICE_ID)) {
             return;
         }
-        $taggedConsumers = $container->findTaggedServiceIds('old_sound_rabbit_mq.base_amqp');
+        $taggedConsumers = $container->findTaggedServiceIds('xiao_zhu_rabbit_xz.base_amqp');
 
         foreach ($taggedConsumers as $id => $tag) {
             $definition = $container->getDefinition($id);

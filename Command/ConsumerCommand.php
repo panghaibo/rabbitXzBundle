@@ -13,6 +13,6 @@ class ConsumerCommand extends BaseConsumerCommand
 
     protected function getConsumerService()
     {
-        return 'old_sound_rabbit_mq.%s_consumer';
+        return 'xiao_zhu_rabbit_xz.%s_consumer';
     }
 }

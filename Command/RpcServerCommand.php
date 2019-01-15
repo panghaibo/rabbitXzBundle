@@ -42,7 +42,7 @@ class RpcServerCommand extends BaseRabbitMqCommand
         }
 
         $this->getContainer()
-               ->get(sprintf('old_sound_rabbit_mq.%s_server', $input->getArgument('name')))
+               ->get(sprintf('xiao_zhu_rabbit_xz.%s_server', $input->getArgument('name')))
                ->start($amount);
     }
 }

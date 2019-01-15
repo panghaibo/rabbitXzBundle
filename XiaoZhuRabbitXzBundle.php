@@ -7,7 +7,7 @@ use XiaoZhu\RabbitXzBundle\DependencyInjection\Compiler\RegisterPartsPass;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class RabbitXzBundle extends Bundle
+class XiaoZhuRabbitXzBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {
@@ -23,10 +23,10 @@ class RabbitXzBundle extends Bundle
     public function shutdown()
     {
         parent::shutdown();
-        if (!$this->container->hasParameter('old_sound_rabbit_mq.base_amqp')) {
+        if (!$this->container->hasParameter('xiao_zhu_rabbit_xz.base_amqp')) {
             return;
         }
-        $connections = $this->container->getParameter('old_sound_rabbit_mq.base_amqp');
+        $connections = $this->container->getParameter('xiao_zhu_rabbit_xz.base_amqp');
         foreach ($connections as $connection) {
             if ($this->container->initialized($connection)) {
                 $this->container->get($connection)->close();
