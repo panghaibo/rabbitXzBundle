@@ -17,6 +17,6 @@ class AnonConsumerCommand extends BaseConsumerCommand
 
     protected function getConsumerService()
     {
-        return 'old_sound_rabbit_mq.%s_anon';
+        return 'xiao_zhu_rabbit_xz.%s_anon';
     }
 }

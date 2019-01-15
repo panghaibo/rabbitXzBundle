@@ -26,10 +26,10 @@ class SetupFabricCommand extends BaseRabbitMqCommand
 
         $output->writeln('Setting up the Rabbit MQ fabric');
 
-        $partsHolder = $this->getContainer()->get('old_sound_rabbit_mq.parts_holder');
+        $partsHolder = $this->getContainer()->get('xiao_zhu_rabbit_xz.parts_holder');
 
         foreach (array('base_amqp', 'binding') as $key) {
-            foreach ($partsHolder->getParts('old_sound_rabbit_mq.' . $key) as $baseAmqp) {
+            foreach ($partsHolder->getParts('xiao_zhu_rabbit_xz.' . $key) as $baseAmqp) {
                 if ($baseAmqp instanceof DynamicConsumer) {
                     continue;
                 }

@@ -10,24 +10,24 @@ class RegisterPartsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $services = $container->findTaggedServiceIds('old_sound_rabbit_mq.base_amqp');
-        $container->setParameter('old_sound_rabbit_mq.base_amqp', array_keys($services));
-        if (!$container->hasDefinition('old_sound_rabbit_mq.parts_holder')) {
+        $services = $container->findTaggedServiceIds('xiao_zhu_rabbit_xz.base_amqp');
+        $container->setParameter('xiao_zhu_rabbit_xz.base_amqp', array_keys($services));
+        if (!$container->hasDefinition('xiao_zhu_rabbit_xz.parts_holder')) {
             return;
         }
 
-        $definition = $container->getDefinition('old_sound_rabbit_mq.parts_holder');
+        $definition = $container->getDefinition('xiao_zhu_rabbit_xz.parts_holder');
 
         $tags = array(
-            'old_sound_rabbit_mq.base_amqp',
-            'old_sound_rabbit_mq.binding',
-            'old_sound_rabbit_mq.producer',
-            'old_sound_rabbit_mq.consumer',
-            'old_sound_rabbit_mq.multi_consumer',
-            'old_sound_rabbit_mq.anon_consumer',
-            'old_sound_rabbit_mq.batch_consumer',
-            'old_sound_rabbit_mq.rpc_client',
-            'old_sound_rabbit_mq.rpc_server',
+            'xiao_zhu_rabbit_xz.base_amqp',
+            'xiao_zhu_rabbit_xz.binding',
+            'xiao_zhu_rabbit_xz.producer',
+            'xiao_zhu_rabbit_xz.consumer',
+            'xiao_zhu_rabbit_xz.multi_consumer',
+            'xiao_zhu_rabbit_xz.anon_consumer',
+            'xiao_zhu_rabbit_xz.batch_consumer',
+            'xiao_zhu_rabbit_xz.rpc_client',
+            'xiao_zhu_rabbit_xz.rpc_server',
         );
 
         foreach ($tags as $tag) {

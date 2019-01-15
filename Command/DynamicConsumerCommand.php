@@ -27,7 +27,7 @@ class DynamicConsumerCommand extends BaseConsumerCommand
 
     protected function getConsumerService()
     {
-        return 'old_sound_rabbit_mq.%s_dynamic';
+        return 'xiao_zhu_rabbit_xz.%s_dynamic';
     }
 
     protected function initConsumer($input)
