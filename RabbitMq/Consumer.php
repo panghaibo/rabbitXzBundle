@@ -53,6 +53,30 @@ class Consumer extends BaseConsumer
     }
 
     /**
+     * 获取远程消息
+     * @param number $timeout 超时的时间
+     * @return number|NULL|boolean
+     */
+    public function pigConsume($timeout = 120)
+    {
+        $alart = time();
+        while (count($this->getChannel()->callbacks)) {
+            if (time() - $alart > $timeout) {
+                return $this->getIdleTimeoutExitCode();
+            }
+            $this->dispatchEvent(OnConsumeEvent::NAME, new OnConsumeEvent($this));
+            try {
+                $this->getChannel()->wait(null, false, 20);
+            } catch (AMQPTimeoutException $e) {
+                $idleEvent = new OnIdleEvent($this);
+                $this->dispatchEvent(OnIdleEvent::NAME, $idleEvent);
+            } catch(\Exception $e) {
+                return false;
+            }
+        }
+    }
+    
+    /**
      * Consume the message
      *
      * @param   int     $msgAmount
