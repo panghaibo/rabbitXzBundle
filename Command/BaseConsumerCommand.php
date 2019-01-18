@@ -86,16 +86,13 @@ abstract class BaseConsumerCommand extends BaseRabbitMqCommand
             throw new \InvalidArgumentException("The -m option should be null or greater than 0");
         }
         $this->initConsumer($input);
-        echo $this->amount;
         return $this->consumer->consume($this->amount);
-        echo "hello world";
     }
 
     protected function initConsumer($input)
     {
         $this->consumer = $this->getContainer()
                 ->get(sprintf($this->getConsumerService(), $input->getArgument('name')));
-        echo get_class($this->consumer);
         if (!is_null($input->getOption('memory-limit')) && ctype_digit((string) $input->getOption('memory-limit')) && $input->getOption('memory-limit') > 0) {
             $this->consumer->setMemoryLimit($input->getOption('memory-limit'));
         }
