@@ -21,7 +21,6 @@ class Client
     public function ping(string $queueName, int $queueNo, int $pid, $memory) : bool
     {
         $command = "PING $queueName $queueNo $pid $memory\n";
-        echo $command;
         return $this->network->commandControl->sendCommand($this->source, $command);
     }
     
