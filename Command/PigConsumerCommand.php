@@ -60,6 +60,8 @@ class PigConsumerCommand extends BaseRabbitMqCommand
      */
     public $needStop = false;
     
+    protected static $defaultName = 'rabbitmq:pigconsumer';
+    
     protected function configure()
     {
         parent::configure();

@@ -93,6 +93,7 @@ class AMQPConnectionFactory
         shuffle($hostConf);
         foreach ($hostConf as $hosts) {
             try {
+                shuffle($hosts);
                 $connection = $this->class::create_connection($hosts, $option);
                 return $connection;
             } catch(\Exception $e) {
