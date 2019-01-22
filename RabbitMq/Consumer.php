@@ -154,17 +154,20 @@ class Consumer extends BaseConsumer
             new BeforeProcessingMessageEvent($this, $msg)
         );
         try {
-            $processFlag = call_user_func($callback, $msg);
+            $process = call_user_func($callback, $msg);
+            $processFlag = $process->getFlag();
+            $errMsg =  $process->getError();
             $this->handleProcessMessage($msg, $processFlag);
             $this->dispatchEvent(
                 AfterProcessingMessageEvent::NAME,
                 new AfterProcessingMessageEvent($this, $msg)
-            );
+                );
             $this->logger->debug('Queue message processed', array(
                 'amqp' => array(
                     'queue' => $queueName,
                     'message' => $msg,
-                    'return_code' => $processFlag
+                    'return_code' => $processFlag,
+                    'error' => $errMsg
                 )
             ));
         } catch (Exception\StopConsumerException $e) {

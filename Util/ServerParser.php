@@ -1,84 +1,45 @@
 <?php
 namespace XiaoZhu\RabbitXzBundle\Util;
 
-class CommandParse
+class ServerParser extends Parser
 {
-    const PING = 'PING';//心跳监控
-    
-    const SHUT = 'SHUT'; //队列进程停止工作
-    
-    const REBOOT = 'REBOOT';
-    
-    const REGISTER = 'REGISTER';//监控进程第一次启动的时候需要向监控中心注册自己
-    
-    const QUEUE = 'QUEUE';//本机器需要启动的队列
-    
-    const REBOOTQUEUE = 'REBOOTQUEUE';//本机器需要重启的队列
-    
-    const STOP = 'STOP';//本机器需要立刻停止的队列
-    
-    const MONITOR = 'MONITOR';//监控中心需要监控进程提供本机器的监控状态
-    
-    const ERROR = 'ERROR'; //错误消息 后面紧接着错误
-    
-    const OK = 'OK'; //正确执行
-    
-    const STAT = 'STAT';//监控统计
-    
-    const QUIT = 'QUIT'; //客户端退出命令
-    
-    const ADD = 'ADD';//新增执行队列
-    
-    const EXIT = 'EXIT';
-    
-    private $network;
-    
-    public function setNetwork(Anet $network)
-    {
-        $this->network = $network;
-    }
-    
     /**
-     * 根据消息文本解析消息
-     * @param string $command
+     * 解析客户端命令
+     * {@inheritDoc}
+     * @see \XiaoZhu\RabbitXzBundle\Util\Parser::parseCommand()
      */
-    public function parseCommand($socket, string $command) : bool
+    public function parseCommand(Client $client) : bool
     {
-        $command = trim($command);
+        $command = trim($client->getRbuffer());
+        if (empty($command)) {
+            return false;
+        }
+        $client->setRbuffer('');
         if ($command == self::QUIT) {
-            return $this->quitCommand($socket);
+            return $this->quitCommand($client);
         } elseif ($command == self::STAT) {
-            return $this->statCommand($socket, '');
+            return $this->statCommand($client, '');
         }else {
             $prefix = strtolower(substr($command, 0, strpos($command, ' ')));
             $suffix = substr($command, strpos($command, ' ') + 1);
         }
         $commandMethod = $prefix.'Command';
         if (!method_exists(__CLASS__, $commandMethod)) {
+            $client->setWbuffer("ERROR bad command\n");
             return true;
         }
-        return call_user_func(array($this, $commandMethod), $socket, $suffix);
+        return call_user_func(array($this, $commandMethod), $client, $suffix);
     }
     
-    public function okCommand($socket) :bool
+    public function quitCommand(Client $client) :bool
     {
+        $reply = "OK server close connection\n";
+        $client->setWbuffer($reply);
+        $client->setCloseAfterReply();
         return true;
     }
     
-    public function errorCommand($socket) :bool
-    {
-        return false;
-    }
-    
-    public function quitCommand($socket) :bool
-    {
-        $replay = "OK server close connection\n";
-        Anet::writen($socket, $replay);
-        $this->network->closeClient($socket);
-        return true;
-    }
-    
-    public function exitCommand($socket, string $suffix) : bool
+    public function exitCommand(Client $client, string $suffix) : bool
     {
         $command = explode(' ', $suffix);
         $queueName = $queueNo = $pid = $bornTime = null;
@@ -92,11 +53,11 @@ class CommandParse
         } else {
             $replay = "ERROR do nothing\n";
         }
-        Anet::writen($socket, $replay);
+        $client->setWbuffer($replay);
         return true;
     }
     
-    public function pingCommand($socket, string $suffix) : bool
+    public function pingCommand(Client $client, string $suffix) : bool
     {
         $command = explode(' ', $suffix);
         $queueName = $queueNo = $pid = $memory = null;
@@ -109,11 +70,11 @@ class CommandParse
             Data::$heartBeadts[$queueName][$queueNo] = ['time' => time(), 'pid' => $pid, 'memory' => $memory];
             $replay = "OK ping success\n";
         }
-        Anet::writen($socket, $replay);
+        $client->setWbuffer($replay);
         return true;
     }
     
-    public function addCommand($socket, string $suffix) :bool
+    public function addCommand(Client $client, string $suffix) :bool
     {
         $command = explode(' ', $suffix);
         $queueName = $queueNo = null;
@@ -128,7 +89,22 @@ class CommandParse
                 unset(Data::$runQueue[$queueName]);
             }
         }
-        Anet::writen($socket, $replay);
+        $client->setWbuffer($replay);
+        return true;
+    }
+    
+    public function rebootCommand($client, string $suffix) :bool
+    {
+        $queueName = $suffix;
+        $replay = " OK add reboot queue\n";
+        if (empty($queueName)) {
+            $replay = "ERROR bad command\n";
+        } elseif (!isset(Data::$runQueue[$queueName])) {
+            $replay = "ERROR no queue named $queueName run this server\n";
+        } else {
+            Data::$rebootQueue[$queueName] = time();
+        }
+        $client->setWbuffer($replay);
         return true;
     }
     
@@ -138,7 +114,7 @@ class CommandParse
      * @param string $suffix
      * @return bool
      */
-    public function statCommand($socket, string $suffix) : bool
+    public function statCommand($client, string $suffix) : bool
     {
         $queue = $suffix;
         if (!empty($queue)) {
@@ -170,7 +146,7 @@ DESC;
          ########################################################################################
          启动时间: %s 活跃时间:%s 启动的队列: %d 内存占用: %s
          ########################################################################################
-         启动队列：\n    
+         启动队列：\n
 DESC;
             $str = '';
             foreach (Data::$runQueue as $queue => $number) {
@@ -180,40 +156,9 @@ DESC;
             }
             $head .= $str;
             $memUse = Stat::memoryUseage();
-            $replay = sprintf($head, date('Y-m-d H:i:s', Data::$bornMonitor), date('Y-m-d H:i:s', Data::$updateMonitor), count(Data::$runQueue), $memUse);  
-        }       
-        Anet::writen($socket, $replay);
-        return true;
-    }
-    
-    public function rebootCommand($socket, string $suffix) :bool
-    {
-        $queueName = $suffix;
-        $replay = " OK add reboot queue\n";
-        if (empty($queueName)) {
-            $replay = "ERROR bad command\n";
-        } elseif (!isset(Data::$runQueue[$queueName])) {
-            $replay = "ERROR no queue named $queueName run this server\n";
-        } else {
-            Data::$rebootQueue[$queueName] = time();
+            $replay = sprintf($head, date('Y-m-d H:i:s', Data::$bornMonitor), date('Y-m-d H:i:s', Data::$updateMonitor), count(Data::$runQueue), $memUse);
         }
-        Anet::writen($socket, $replay);
+        $client->setWbuffer($replay);
         return true;
-    }
-    
-    /**
-     * 发送命令
-     */
-    public function sendCommand($socket, string $command) : bool
-    {
-        $res = $this->network->socketCanWrite($socket);
-        if ($res == false) return false;
-        $res = $this->network->writen($socket, $command);
-        if (empty($res)) return false;
-        $res = $this->network->socketCanRead($socket);
-        if (empty($res)) return false;
-        $ack = socket_read($socket, Anet::MAX_READ_BYTES, PHP_NORMAL_READ);
-        if (empty($ack)) return false;
-        return $this->parseCommand($socket, $ack);
     }
 }

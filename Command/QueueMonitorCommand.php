@@ -18,11 +18,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use XiaoZhu\RabbitXzBundle\Util\Data;
 use XiaoZhu\RabbitXzBundle\Util\Anet;
-use XiaoZhu\RabbitXzBundle\Util\CommandParse;
+use XiaoZhu\RabbitXzBundle\Util\MonitorException;
+use XiaoZhu\RabbitXzBundle\Util\ServerParser;
 
 class QueueMonitorCommand extends Command
 {
-    const COMMAND_NAME = 'rabbit-monitor';
+    const COMMAND_NAME = 'rabbitmq:monitor';
+    
+    //linux内核可能没有加大这个参数，所以客户端需要每次连接后断开
+    const CLIENT_MAX = 1024;
     
     //接收远程命令的端口
     const MANAGER_PORT = 1314;
@@ -68,7 +72,7 @@ class QueueMonitorCommand extends Command
     private $sockFileName = 'rabbitmonitor';
     
     /*
-     * @var 本地管理进程的socket handler 
+     * @var 本地管理进程的socket handler
      */
     private $localSocket;
     
@@ -83,12 +87,12 @@ class QueueMonitorCommand extends Command
     private $lastError;
     
     /*
-     * @val int backlog 
+     * @val int backlog
      */
     private $backlog = 100;
     
     /*
-     * @val string 本机IP 
+     * @val string 本机IP
      */
     private $ip;
     
@@ -167,7 +171,7 @@ class QueueMonitorCommand extends Command
     public function startNewProcess($queue, $queueNo) : bool
     {
         $command = $this->phpBin;
-        $argv = [$this->project .'/bin/console', 'rabbitmq:pigconsumer', $queue, $queueNo, $this->workspace, $this->sockFileName, '>/dev/null', '2>&1'];
+        $argv = [$this->project .'/bin/console', 'rabbitmq:pigconsumer', $queue, $queueNo, $this->workspace, $this->sockFileName];
         $flag = pcntl_fork();
         if ($flag == 0) {
             $this->network->stop();//子进程关闭所有的描述符
@@ -176,7 +180,7 @@ class QueueMonitorCommand extends Command
             Data::$heartBeadts[$queue][$queueNo] = [
                 'pid' => $flag,
                 'time' => time(),
-                'memory' => 0,
+                'memory' => '0K',
             ];
         }
         return true;
@@ -187,31 +191,31 @@ class QueueMonitorCommand extends Command
      */
     public function startQueueCheck() : bool
     {
-       if (time() - Data::$bornMonitor < 600) {
-           return true;    
-       }
-       foreach (Data::$runQueue as $queue => $works) {
-           if ($works < 1) continue;
-           for ($i = 1; $i <= $works; $i++) {
-               if (!isset(Data::$heartBeadts[$queue][$i])) {
-                   $this->startNewProcess($queue, $i);
-               }
-           }
-       }
-       //启动就挂掉的进程 可能来不及ping服务端
-       foreach (Data::$heartBeadts as $queueName => $item) {
-           foreach ($item as $queueNo => $info) {
-               $pid = $info['pid'];
-               $time = $info['time'];
-               if (time() - $time > 300) {
-                   posix_kill($pid, SIGUSR1);//确保进程死掉
-                   if (isset(Data::$heartBeadts[$queueName][$queueNo])) {
-                       unset(Data::$heartBeadts[$queueName][$queueNo]);
-                   }
-               }
-           }
-       }
-       return true;
+        if (time() - Data::$bornMonitor < 600) {
+            return true;
+        }
+        foreach (Data::$runQueue as $queue => $works) {
+            if ($works < 1) continue;
+            for ($i = 1; $i <= $works; $i++) {
+                if (!isset(Data::$heartBeadts[$queue][$i])) {
+                    $this->startNewProcess($queue, $i);
+                }
+            }
+        }
+        //启动就挂掉的进程 可能来不及ping服务端
+        foreach (Data::$heartBeadts as $queueName => $item) {
+            foreach ($item as $queueNo => $info) {
+                $pid = $info['pid'];
+                $time = $info['time'];
+                if (time() - $time > 300) {
+                    posix_kill($pid, SIGUSR1);//确保进程死掉
+                    if (isset(Data::$heartBeadts[$queueName][$queueNo])) {
+                        unset(Data::$heartBeadts[$queueName][$queueNo]);
+                    }
+                }
+            }
+        }
+        return true;
     }
     
     /**
@@ -222,14 +226,11 @@ class QueueMonitorCommand extends Command
         if (file_exists($this->pidFile)) {
             $pInfo = trim(file_get_contents($this->pidFile));
             if (!empty($pInfo)) {
-                $pInfo = json_decode($pInfo, true);
-                if ($pInfo['pid'] != $this->pid && time() - $pInfo['upTime'] < 300)
+                if ($pInfo != $this->pid)
                 {
-                    $this->lastError = '管理进程已经存在';
-                    return false;
+                    throw MonitorException('管理进程已经存在');
                 }
             }
-            $this->updateProcessInfo();
         }
         return true;
     }
@@ -258,25 +259,23 @@ class QueueMonitorCommand extends Command
         //检测对workspace是否有读取权限
         if (!file_exists($this->workspace) || !is_dir($this->workspace) || !is_writable($this->workspace))
         {
-            $output->writeln("Please Check The ".$this->workspace." Exists Or Writable Or Is Directory");
-            exit;
+            throw new MonitorException("Please Check The ".$this->workspace." Exists Or Writable Or Is Directory");
         }
-        if (!extension_loaded('pcntl')) 
+        if (!extension_loaded('pcntl'))
         {
-            $output->writeln('PHP Extension Named pnctl Can Not Found');
-            exit;
+            throw new MonitorException('PHP Extension Named pnctl Can Not Found');
         }
         //检测监控程序是否异常
-        $res = $this->processCheck();
-        if ($res == false) {
-            exit(0);
-        }
+        $this->processCheck();
         chdir($this->workspace);
         $this->pidFile = 'monitor.pid';
         /*注册SIGCHLD信号处理防止出现僵尸进程*/
         pcntl_signal(SIGCHLD, SIG_IGN);
         pcntl_signal(SIGUSR1, array($this, 'stopMonitor'));
-        $this->network = new Anet(new CommandParse());
+        pcntl_signal(SIGINT, array($this, 'stopMonitor'));
+        $this->network = new Anet();
+        $parser = new ServerParser();
+        $this->network->setParser($parser);
         $this->network->createUnixServer($this->sockFileName);
         $this->network->createTcpServer('0.0.0.0', $this->port);
         $this->restoreQueueConf();
