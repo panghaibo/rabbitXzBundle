@@ -10,7 +10,6 @@ class ClientParser extends Parser
      */
     public function parseCommand(Client $client) : bool
     {
-        echo $client->getRbuffer();
         $command = trim($client->getRbuffer());
         if (empty($command)) {
             return false;
