@@ -162,7 +162,7 @@ class QueueMonitorCommand extends Command
             Data::$updateMonitor = time();
             $this->updateProcessInfo();
             $this->startQueueCheck();
-            $this->network->netLoopApi();
+            $this->network->netLoopApi(20);
             $this->flushQueueToFile();
             pcntl_signal_dispatch();
         }
@@ -192,7 +192,7 @@ class QueueMonitorCommand extends Command
      */
     public function startQueueCheck() : bool
     {
-        if (time() - Data::$bornMonitor < 600) {
+        if (time() - Data::$bornMonitor < 300) {
             return true;
         }
         foreach (Data::$runQueue as $queue => $works) {
@@ -287,7 +287,7 @@ class QueueMonitorCommand extends Command
         $status = 0;
         $pid = 0;
         while (0 != ($pid = pcntl_waitpid(-1, $status, WNOHANG))) {
-            if ($pid == -1 || pcntl_wifstopped($status) == false) continue;
+            if ($pid == -1) continue;
             if (isset(Data::$childProcess[$pid])) {
                 $queue = Data::$childProcess[$pid]['queue'];
                 $queueNo = Data::$childProcess[$pid]['queueNo'];
