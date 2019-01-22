@@ -4,13 +4,14 @@
  */
 namespace XiaoZhu\RabbitXzBundle\Command;
 
+use XiaoZhu\RabbitXzBundle\Command\BaseRabbitMqCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use XiaoZhu\RabbitXzBundle\Util\Anet;
-use XiaoZhu\RabbitXzBundle\Util\CommandParse;
 use XiaoZhu\RabbitXzBundle\Util\Stat;
+use XiaoZhu\RabbitXzBundle\Util\ClientParser;
 
 class PigConsumerCommand extends BaseRabbitMqCommand
 {
@@ -77,14 +78,17 @@ class PigConsumerCommand extends BaseRabbitMqCommand
      */
     protected function monitor() : bool
     {
-        $network = new Anet(new CommandParse());
-        $client = $network->getUnixClient($this->unixSock);
-        if ($client == null) {
+        $net = new Anet();
+        $parser = new ClientParser();
+        $net->setParser($parser);
+        $client = $net->getUnixClient($this->unixSock);
+        if ($client->getConnectState() != ANET::ANET_CONNECTED) {
             return false;
         }
         //询问当前进程是否可以停止
         $status = $client->canExit($this->queueName, $this->queueNo, $this->pid, $this->bornTime);
         if ($status == true) {
+            $this->consumer->stopConsuming();
             exit(0);
         }
         $status = $client->ping($this->queueName, $this->queueNo, $this->pid, Stat::memoryUseage());
@@ -101,7 +105,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
             pcntl_signal_dispatch();
         }
     }
-
+    
     /**
      * 消费程序的封装
      * @return bool
@@ -109,7 +113,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
     protected function runQueue()
     {   $status = $this->getConsumer();
         if ($status == true) {
-            $this->consumer->PigConsume(90);
+            $this->consumer->PigConsume(120);
         }
     }
     
@@ -153,10 +157,10 @@ class PigConsumerCommand extends BaseRabbitMqCommand
      * @return bool
      */
     protected function getConsumer() : bool
-    { 
+    {
         try {
             if ($this->consumer == null || false == $this->consumer->getChannel()->getConnection()->isConnected()) {
-                if ($this->consumer != null) { 
+                if ($this->consumer != null) {
                     $this->consumer->reconnect();
                 }
                 $this->consumer = $this->getContainer()->get(sprintf($this->getConsumerService(), $this->queueName));
@@ -164,7 +168,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
             }
             return true;
         } catch(\Exception $e) {
-            return false;
+            exit("down");
         }
-    } 
+    }
 }
