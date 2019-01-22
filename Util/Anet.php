@@ -28,7 +28,7 @@ class Anet
     
     const ANET_NONBLOCK = 0;
     
-    public $waitTime = 3;
+    public $waitTime = 20;
     
     private $read = [];
     
