@@ -23,7 +23,7 @@ use XiaoZhu\RabbitXzBundle\Util\ServerParser;
 
 class QueueMonitorCommand extends Command
 {
-    const COMMAND_NAME = 'rabbitmq:monitor';
+    protected static $defaultName = 'rabbitmq:monitor';
     
     //linux内核可能没有加大这个参数，所以客户端需要每次连接后断开
     const CLIENT_MAX = 1024;
@@ -113,7 +113,7 @@ class QueueMonitorCommand extends Command
      */
     protected function configure()
     {
-        $this->setName(self::COMMAND_NAME);
+        $this->setName(static::$defaultName);
         $this->addArgument('php', InputArgument::REQUIRED, 'The PHP Bin File Path Needed');
         $this->addArgument('workspace', InputArgument::REQUIRED, 'The Daemon Workspace Path Needed');
         $this->addArgument('ip', InputArgument::REQUIRED, 'The Daemon Run Enviroment Ip');
