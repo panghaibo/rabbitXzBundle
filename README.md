@@ -62,7 +62,7 @@ Escape character is '^]'.
 ADD queue_haibo_test 3   #代表需要在本机器启动队列key `queue_haibo_test` 3个消费进程 0代表不启动消费进程
 OK success
 REBOOT queue_haibo_test  #代表重启本机器的queue_haibo_test 队列
-ok success
+OK success
 STAT    #查看当前机器有多少任务 以及监控进程本身的一些信息
 STAT queue_haibo_test 代表查看 queue_haibo_test 消费着的具体信息 以及向监控进程心跳的时间 每隔120s 会向监控中心心跳消费者信息
 QUIT #退出
