@@ -71,6 +71,14 @@
         <service id="xiao_zhu_rabbit_xz.command.std_in_producer_command" class="XiaoZhu\RabbitXzBundle\Command\StdInProducerCommand">
             <tag name="console.command" command="rabbitmq:stdin-producer" />
         </service>
+        
+        <service id="xiao_zhu_rabbit_xz.command.pig_consumer_command" class="XiaoZhu\RabbitXzBundle\Command\PigConsumerCommand">
+            <tag name="console.command" command="rabbitmq:pigconsumer" />
+        </service>
+        
+        <service id="xiao_zhu_rabbit_xz.command.queue_monitor_command" class="XiaoZhu\RabbitXzBundle\Command\QueueMonitorCommand">
+            <tag name="console.command" command="rabbitmq:monitor" />
+        </service>
     </services>
 
 </container>

@@ -26,4 +26,6 @@ class Data
     public static $bornMonitor;
     
     public static $updateMonitor;
+    
+    public static $childProcess = [];//pid => queue => queueno
 }

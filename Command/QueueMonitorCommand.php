@@ -182,6 +182,7 @@ class QueueMonitorCommand extends Command
                 'time' => time(),
                 'memory' => '0K',
             ];
+            Data::$childProcess[$flag] = array('queue' => $queue, 'queueNo' => $queueNo);
         }
         return true;
     }
@@ -270,7 +271,7 @@ class QueueMonitorCommand extends Command
         chdir($this->workspace);
         $this->pidFile = 'monitor.pid';
         /*注册SIGCHLD信号处理防止出现僵尸进程*/
-        pcntl_signal(SIGCHLD, SIG_IGN);
+        pcntl_signal(SIGCHLD, array($this, 'chldSignal'));
         pcntl_signal(SIGUSR1, array($this, 'stopMonitor'));
         pcntl_signal(SIGINT, array($this, 'stopMonitor'));
         $this->network = new Anet();
@@ -279,6 +280,21 @@ class QueueMonitorCommand extends Command
         $this->network->createUnixServer($this->sockFileName);
         $this->network->createTcpServer('0.0.0.0', $this->port);
         $this->restoreQueueConf();
+    }
+    
+    public function chldSignal($signo)
+    {
+        $status = 0;
+        $pid = 0;
+        while (0 != ($pid = pcntl_waitpid(-1, $status, WNOHANG))) {
+            if ($pid == -1 || pcntl_wifstopped($status) == false) continue;
+            if (isset(Data::$childProcess[$pid])) {
+                $queue = Data::$childProcess[$pid]['queue'];
+                $queueNo = Data::$childProcess[$pid]['queueNo'];
+                if (isset(Data::$heartBeadts[$queue][$queueNo])) unset(Data::$heartBeadts[$queue][$queueNo]);
+                unset(Data::$childProcess[$pid]);
+            }
+        }
     }
     
     /**
