@@ -113,9 +113,11 @@ class PigConsumerCommand extends BaseRabbitMqCommand
      * @return bool
      */
     protected function runQueue()
-    {   $status = $this->getConsumer();
-        if ($status == true) {
+    {   
+        try {
             $this->consumer->PigConsume(120);
+        } catch (\Exception $e) {
+            exit($e->getMessage());
         }
     }
     
@@ -158,7 +160,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
      * 如果网络断开我们就重新连接
      * @return bool
      */
-    protected function getConsumer() : bool
+    protected function getConsumer()
     {
         try {
             if ($this->consumer == null || false == $this->consumer->getChannel()->getConnection()->isConnected()) {
