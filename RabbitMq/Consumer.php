@@ -70,8 +70,6 @@ class Consumer extends BaseConsumer
             } catch (AMQPTimeoutException $e) {
                 $idleEvent = new OnIdleEvent($this);
                 $this->dispatchEvent(OnIdleEvent::NAME, $idleEvent);
-            } catch(\Exception $e) {
-                return false;
             }
         }
     }

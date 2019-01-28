@@ -286,8 +286,9 @@ class QueueMonitorCommand extends Command
     {
         $status = 0;
         $pid = 0;
-        while (0 != ($pid = pcntl_waitpid(-1, $status, WNOHANG))) {
-            if ($pid == -1) continue;
+        while (true) {
+            $pid = pcntl_waitpid(-1, $status, WNOHANG);
+            if ($pid == -1 || $pid == 0) break;
             if (isset(Data::$childProcess[$pid])) {
                 $queue = Data::$childProcess[$pid]['queue'];
                 $queueNo = Data::$childProcess[$pid]['queueNo'];

@@ -277,6 +277,11 @@ class Anet
         foreach ($this->servers as $server) {
             socket_close($server);
         }
+        foreach ($this->client as $client) {
+            if (is_resource($client->getResource())) {
+                socket_close($client->getResource());
+            }
+        }
     }
     
     /**
