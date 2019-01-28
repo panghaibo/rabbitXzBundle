@@ -115,7 +115,8 @@ class PigConsumerCommand extends BaseRabbitMqCommand
     protected function runQueue()
     {   
         try {
-            $this->consumer->PigConsume(120);
+            $this->getConsumer();
+            $this->consumer->pigConsume(120);
         } catch (\Exception $e) {
             exit($e->getMessage());
         }
