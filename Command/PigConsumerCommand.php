@@ -115,7 +115,8 @@ class PigConsumerCommand extends BaseRabbitMqCommand
     protected function runQueue()
     {   
         try {
-            $this->consumer->PigConsume(120);
+            $this->getConsumer();
+            $this->consumer->pigConsume(120);
         } catch (\Exception $e) {
             exit($e->getMessage());
         }
@@ -168,6 +169,10 @@ class PigConsumerCommand extends BaseRabbitMqCommand
                     $this->consumer->reconnect();
                 }
                 $this->consumer = $this->getContainer()->get(sprintf($this->getConsumerService(), $this->queueName));
+                $option = $this->consumer->getQueueOptions();
+                if (isset($option['routing_keys']) && !empty($option['routing_keys'])) {
+                    $this->consumer->setRoutingKey($option['routing_keys'][0]);
+                }
                 $this->consumer->setupConsumer();
             }
             return true;
