@@ -153,6 +153,11 @@ abstract class BaseAmqp
     {
         $this->queueOptions = array_merge($this->queueOptions, $options);
     }
+   
+    public function getQueueOptions()
+    {
+        return $this->queueOptions;
+    }
 
     /**
      * @param  string $routingKey
