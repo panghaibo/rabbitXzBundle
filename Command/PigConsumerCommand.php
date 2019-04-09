@@ -173,6 +173,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
                 if (isset($option['routing_keys']) && !empty($option['routing_keys'])) {
                     $this->consumer->setRoutingKey($option['routing_keys'][0]);
                 }
+                $this->consumer->setMemoryLimit(35);//暂时限定
                 $this->consumer->setupConsumer();
             }
             return true;

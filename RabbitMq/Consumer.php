@@ -225,6 +225,7 @@ class Consumer extends BaseConsumer
 
         if (!is_null($this->getMemoryLimit()) && $this->isRamAlmostOverloaded()) {
             $this->stopConsuming();
+            exit(0);//防止内存溢出
         }
     }
 
