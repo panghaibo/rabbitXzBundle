@@ -229,7 +229,7 @@ class QueueMonitorCommand extends Command
             if (!empty($pInfo)) {
                 if ($pInfo != $this->pid)
                 {
-                    throw MonitorException('管理进程已经存在');
+                    exit(0);
                 }
             }
         }
@@ -266,10 +266,10 @@ class QueueMonitorCommand extends Command
         {
             throw new MonitorException('PHP Extension Named pnctl Can Not Found');
         }
-        //检测监控程序是否异常
-        $this->processCheck();
-        chdir($this->workspace);
         $this->pidFile = 'monitor.pid';
+        //检测监控程序是否异常
+        chdir($this->workspace);
+        $this->processCheck();
         /*注册SIGCHLD信号处理防止出现僵尸进程*/
         pcntl_signal(SIGCHLD, array($this, 'chldSignal'));
         pcntl_signal(SIGUSR1, array($this, 'stopMonitor'));

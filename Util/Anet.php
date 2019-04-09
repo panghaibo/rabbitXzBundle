@@ -168,6 +168,9 @@ class Anet
         if ($localSocket == false) {
             throw new AnetException(socket_strerror(socket_last_error()));
         }
+        if (file_exists($sockPath)) {
+            unlink($sockPath);
+        }
         $res = socket_bind($localSocket, $sockPath);
         if ($res == false) {
             socket_close($res);
