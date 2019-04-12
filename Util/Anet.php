@@ -201,6 +201,10 @@ class Anet
         if ($localSocket == false) {
             throw new AnetException(socket_strerror(socket_last_error()));
         }
+        if (!socket_set_option($localSocket, SOL_SOCKET, SO_REUSEADDR, 1)) {
+            socket_close($localSocket);
+            throw new AnetException(socket_strerror(socket_last_error()));
+        }
         $res = socket_bind($localSocket, $ip, $port);
         if ($res == false) {
             socket_close($res);
@@ -209,10 +213,6 @@ class Anet
         $res = socket_listen($localSocket, 100);
         if ($res == false) {
             socket_close($res);
-            throw new AnetException(socket_strerror(socket_last_error()));
-        }
-        if (!socket_set_option($localSocket, SOL_SOCKET, SO_REUSEADDR, 1)) {
-            socket_close($localSocket);
             throw new AnetException(socket_strerror(socket_last_error()));
         }
         socket_set_nonblock($localSocket);

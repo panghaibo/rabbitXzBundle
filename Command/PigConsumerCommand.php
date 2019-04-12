@@ -144,7 +144,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
         chdir($this->workspace);
     }
     
-    protected function sigUsr1Deal($signo)
+    public function sigUsr1Deal($signo)
     {
         try {
             $this->consumer->stopConsuming();
