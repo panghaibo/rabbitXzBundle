@@ -113,6 +113,8 @@ class QueueMonitorCommand extends Command
      */
     protected function configure()
     {
+        ini_set("max_execution_time", 0);
+        set_time_limit(0);
         $this->setName(static::$defaultName);
         $this->addArgument('php', InputArgument::REQUIRED, 'The PHP Bin File Path Needed');
         $this->addArgument('workspace', InputArgument::REQUIRED, 'The Daemon Workspace Path Needed');
