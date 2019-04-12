@@ -116,7 +116,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
     {   
         try {
             $this->getConsumer();
-            $this->consumer->pigConsume(120);
+            $this->consumer->pigConsume(60);
         } catch (\Exception $e) {
             exit($e->getMessage());
         }
@@ -144,7 +144,7 @@ class PigConsumerCommand extends BaseRabbitMqCommand
         chdir($this->workspace);
     }
     
-    protected function sigUsr1Deal($signo)
+    public function sigUsr1Deal($signo)
     {
         try {
             $this->consumer->stopConsuming();

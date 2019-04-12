@@ -57,7 +57,7 @@ class Consumer extends BaseConsumer
      * @param number $timeout 超时的时间
      * @return number|NULL|boolean
      */
-    public function pigConsume($timeout = 120)
+    public function pigConsume($timeout = 60)
     {
         $alart = time();
         while (count($this->getChannel()->callbacks)) {
