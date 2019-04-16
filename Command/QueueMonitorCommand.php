@@ -62,11 +62,6 @@ class QueueMonitorCommand extends Command
     private $updateTime;
     
     /*
-     * @var string pid文件
-     */
-    private $pidFile;
-    
-    /*
      * @var socket unix file name
      */
     private $sockFileName = 'rabbitmonitor';
@@ -162,7 +157,6 @@ class QueueMonitorCommand extends Command
         while(true)
         {
             Data::$updateMonitor = time();
-            $this->updateProcessInfo();
             $this->startQueueCheck();
             $this->network->netLoopApi(20);
             $this->flushQueueToFile();
@@ -217,32 +211,7 @@ class QueueMonitorCommand extends Command
         }
         return true;
     }
-    
-    /**
-     * 检测Monitor进程是否正常
-     */
-    private function processCheck()
-    {
-        if (file_exists($this->pidFile)) {
-            $pInfo = trim(file_get_contents($this->pidFile));
-            if (!empty($pInfo)) {
-                if ($pInfo != $this->pid)
-                {
-                    exit(0);
-                }
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * 更新注册表中进程的活跃时间
-     */
-    private function updateProcessInfo()
-    {
-        file_put_contents($this->pidFile, $this->pid);
-    }
-    
+        
     /**
      * 初始化
      */
@@ -265,10 +234,8 @@ class QueueMonitorCommand extends Command
         {
             throw new MonitorException('PHP Extension Named pnctl Can Not Found');
         }
-        $this->pidFile = 'monitor.pid';
         //检测监控程序是否异常
         chdir($this->workspace);
-        $this->processCheck();
         /*注册SIGCHLD信号处理防止出现僵尸进程*/
         pcntl_signal(SIGCHLD, array($this, 'chldSignal'));
         pcntl_signal(SIGUSR1, array($this, 'stopMonitor'));
@@ -311,12 +278,6 @@ class QueueMonitorCommand extends Command
      */
     public function __destruct()
     {
-        if (!empty($this->pidFile) && file_exists($this->pidFile)) {
-            $pid = trim(file_get_contents($this->pidFile));
-            if ($pid == $this->pid) {
-                unlink($this->pidFile);
-                unlink($this->sockFileName);
-            }
-        }
+        unlink($this->sockFileName);
     }
 }
