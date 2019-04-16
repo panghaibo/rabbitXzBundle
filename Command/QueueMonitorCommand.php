@@ -194,9 +194,6 @@ class QueueMonitorCommand extends Command
      */
     public function startQueueCheck() : bool
     {
-        if (time() - Data::$bornMonitor < 300) {
-            return true;
-        }
         foreach (Data::$runQueue as $queue => $works) {
             if ($works < 1) continue;
             for ($i = 1; $i <= $works; $i++) {
