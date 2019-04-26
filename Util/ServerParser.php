@@ -55,7 +55,7 @@ class ServerParser extends Parser
         }
         if (!isset(Data::$runQueue[$queueName]) || Data::$runQueue[$queueName] < $queueNo) {
             $replay = "OK this work stop right now\n";
-        } elseif (isset(Data::$rebootQueue[$queueName]) && (($currentPid != null && $currentPid != $pid) || (Data::$rebootQueue[$queueName] > $bornTime))) {
+        } elseif (isset(Data::$runQueue[$queueName]) && (($currentPid != null && $currentPid != $pid) || (isset(Data::$rebootQueue[$queueName]) && Data::$rebootQueue[$queueName] > $bornTime))) {
             $replay = "OK this work stop right now\n";
         } else {
             $replay = "ERROR do nothing\n";

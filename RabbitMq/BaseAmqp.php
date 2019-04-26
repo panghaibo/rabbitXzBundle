@@ -195,6 +195,11 @@ abstract class BaseAmqp
         $this->logger = $logger;
     }
 
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+    
     /**
      * Declares exchange
      */

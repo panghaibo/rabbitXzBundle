@@ -278,6 +278,8 @@ class QueueMonitorCommand extends Command
      */
     public function __destruct()
     {
-        @unlink($this->sockFileName);
+        if (file_exists($this->sockFileName)) {
+            @unlink($this->sockFileName);
+        }
     }
 }
