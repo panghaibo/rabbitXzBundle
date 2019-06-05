@@ -12,6 +12,9 @@ use PhpAmqpLib\Exception\AMQPTimeoutException;
 use XiaoZhu\RabbitXzBundle\Util\Anet;
 use XiaoZhu\RabbitXzBundle\Util\Stat;
 use XiaoZhu\RabbitXzBundle\Util\ClientParser;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\NullLogger;
 
 class PigConsumerCommand extends BaseRabbitMqCommand
 {
@@ -90,7 +93,6 @@ class PigConsumerCommand extends BaseRabbitMqCommand
         //询问当前进程是否可以停止
         $status = $client->canExit($this->queueName, $this->queueNo, $this->pid, $this->bornTime);
         if ($status == true) {
-            $this->consumer->stopConsuming();
             exit(0);
         }
         $status = $client->ping($this->queueName, $this->queueNo, $this->pid, Stat::memoryUseage());
@@ -175,6 +177,13 @@ class PigConsumerCommand extends BaseRabbitMqCommand
                 }
                 $this->consumer->setMemoryLimit(35);//暂时限定
                 $this->consumer->setupConsumer();
+            }
+            $logger = $this->consumer->getLogger();
+            if (!$logger instanceof NullLogger) {
+                $logPath = $this->container->get('kernel')->getLogDir().'/queue/'.$this->queueName.'/'.date('Y-m-d').'.log';
+                $log = new Logger($this->queueName);
+                $log->pushHandler(new StreamHandler($logPath, Logger::DEBUG));
+                $this->consumer->setLogger($log);
             }
             return true;
         } catch(\Exception $e) {

@@ -8,6 +8,12 @@ namespace XiaoZhu\RabbitXzBundle\Util;
 
 class Data
 {   
+    //日志目录
+    public static $logPath = null;
+    
+    //限流器
+    public static $limiter = [];
+    
     /*
      * @var array 本项目本机器 运行的队列程序
      */

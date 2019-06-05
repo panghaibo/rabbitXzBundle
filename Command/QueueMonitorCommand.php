@@ -12,7 +12,6 @@
  */
 namespace XiaoZhu\RabbitXzBundle\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,8 +19,9 @@ use XiaoZhu\RabbitXzBundle\Util\Data;
 use XiaoZhu\RabbitXzBundle\Util\Anet;
 use XiaoZhu\RabbitXzBundle\Util\MonitorException;
 use XiaoZhu\RabbitXzBundle\Util\ServerParser;
+use XiaoZhu\RabbitXzBundle\Util\RateLimiter;
 
-class QueueMonitorCommand extends Command
+class QueueMonitorCommand extends BaseRabbitMqCommand
 {
     protected static $defaultName = 'rabbitmq:monitor';
     
@@ -166,6 +166,14 @@ class QueueMonitorCommand extends Command
     
     public function startNewProcess($queue, $queueNo) : bool
     {
+        $key = $queue.'_'.$queueNo;
+        if (!isset(Data::$limiter[$key])) {
+            Data::$limiter[$key] = new RateLimiter($queue, $queueNo);
+        }
+        $limiter = Data::$limiter[$key];
+        if ($limiter->limit()) {
+            return false;
+        }
         $command = $this->phpBin;
         $argv = [$this->project .'/bin/console', 'rabbitmq:pigconsumer', $queue, $queueNo, $this->workspace, $this->sockFileName];
         $flag = pcntl_fork();
@@ -234,6 +242,8 @@ class QueueMonitorCommand extends Command
         {
             throw new MonitorException('PHP Extension Named pnctl Can Not Found');
         }
+        //日志目录
+        Data::$logPath = $this->container->get('kernel')->getLogDir().'/queue';
         //检测监控程序是否异常
         chdir($this->workspace);
         /*注册SIGCHLD信号处理防止出现僵尸进程*/
@@ -278,6 +288,8 @@ class QueueMonitorCommand extends Command
      */
     public function __destruct()
     {
-        @unlink($this->sockFileName);
+        if (file_exists($this->sockFileName)) {
+            @unlink($this->sockFileName);
+        }
     }
 }
