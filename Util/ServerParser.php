@@ -168,4 +168,43 @@ DESC;
         $client->setWbuffer($replay);
         return true;
     }
+    
+    /**
+     * 获取队列KEY的日志，垃圾小猪
+     */
+    public function logCommand($client, string $suffix) : bool
+    {
+        $queueName = $suffix;
+        if (empty($queueName)) {
+            $replay = "ERROR bad command\n";
+            goto result;
+        } elseif(empty(Data::$logPath)) {
+            $replay = "ERROR log path empty\n";
+            goto result;
+        }
+        $file = Data::$logPath.'/'.$queueName.'/'.date('Y-m-d').'.log';
+        if (!file_exists($file)) {
+            $replay = "ERROR log file ".$file." not exists\n";
+            goto result;
+        }
+        if (filesize($file) == 0) {
+            $replay = "ERROR log file empty\n";
+            goto result;
+        }
+        $handle = fopen($file, 'r');
+        fseek($handle, 0, SEEK_END);
+        $cur = ftell($handle);
+        $chars = 0;
+        while(true) {
+            $char = fgetc($handle);
+            if ($char == "\n" && $chars) break;
+            if ($char != "\n" && $char !== false) $chars++;
+            fseek($handle, $cur--, SEEK_SET);
+        }
+        $replay = fgets($handle);
+        fclose($handle);
+        result:
+        $client->setWbuffer($replay);
+        return true;
+    }
 }
